@@ -1,42 +1,38 @@
 FROM debian:bullseye-slim
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    GLAMA_VERSION="0.2.0" \
-    PATH="/home/service-user/.local/bin:${PATH}"
+    # Add npm global bin to PATH for service-user
+    PATH="/home/service-user/.npm-global/bin:/home/service-user/.local/bin:${PATH}"
 
-RUN (groupadd -r service-user)
-RUN (useradd -u 1987 -r -m -g service-user service-user)
-RUN (mkdir -p /home/service-user/.local/bin /app)
-RUN (chown -R service-user:service-user /home/service-user /app)
-RUN (apt-get update)
-RUN (apt-get install -y --no-install-recommends build-essential curl wget software-properties-common libssl-dev zlib1g-dev git)
-RUN (rm -rf /var/lib/apt/lists/*)
-RUN (curl -fsSL https://deb.nodesource.com/setup_22.x | bash -)
-RUN (apt-get install -y nodejs)
-RUN (apt-get clean)
-RUN (npm install -g mcp-proxy@2.10.6)
-RUN (npm install -g pnpm@9.15.5)
-RUN (npm install -g bun@1.1.42)
-RUN (node --version)
-RUN (curl -LsSf https://astral.sh/uv/install.sh | UV_INSTALL_DIR="/usr/local/bin" sh)
-RUN (uv python install 3.13 --default --preview)
-RUN (ln -s $(uv python find) /usr/local/bin/python)
-RUN (python --version)
-RUN (apt-get clean)
-RUN (rm -rf /var/lib/apt/lists/*)
-RUN (rm -rf /tmp/*)
-RUN (rm -rf /var/tmp/*)
-RUN (su - service-user -c "uv python install 3.13 --default --preview && python --version")
+# Create service user and set up directories
+RUN groupadd -r service-user && \
+    useradd -u 1987 -r -m -g service-user service-user && \
+    # Create app dir and npm global dir owned by user
+    mkdir -p /home/service-user/.local/bin /app /home/service-user/.npm-global && \
+    chown -R service-user:service-user /home/service-user /app
 
-# Comment next two lines and uncomment git clone lines to use repository or vice versa
-COPY . /app
-RUN chown -R service-user:service-user /app
+# Install Node.js and system dependencies as root
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends curl && \
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && \
+    apt-get update && \
+    apt-get install -y nodejs npm && \
+    node --version && \
+    npm --version && \
+    # mcp-proxy install removed from root steps
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# Switch to service-user BEFORE installing global packages for that user
 USER service-user
+WORKDIR /home/service-user
+
+# Configure npm to use the user's global directory
+RUN npm config set prefix '/home/service-user/.npm-global'
+
+# Install mcp-proxy globally for the service-user
+RUN npm install -g mcp-proxy@2.10.6
+
 WORKDIR /app
-# RUN git clone https://github.com/Vizioz/Teamwork-MCP .
-# RUN git checkout main
 
-RUN (npm install)
-RUN (npm run build)
-
-CMD ["mcp-proxy","node","build/index.js"]
+CMD ["mcp-proxy", "npx", "-y", "@vizioz/teamwork-mcp"]
