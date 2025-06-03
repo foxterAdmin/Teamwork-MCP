@@ -56,6 +56,7 @@ export const loadConfig = (args?: string[]) => {
   const argv = args 
     ? minimist(args, {
         string: ['teamwork-domain', 'teamwork-username', 'teamwork-password', 'teamwork-project-id', 'solution-root', 'allow-tools', 'deny-tools'],
+        boolean: ['disable-logging', 'no-logging'],
         alias: {
           'domain': 'teamwork-domain',
           'user': 'teamwork-username',
@@ -68,6 +69,7 @@ export const loadConfig = (args?: string[]) => {
       })
     : minimist(process.argv.slice(2), {
         string: ['teamwork-domain', 'teamwork-username', 'teamwork-password', 'teamwork-project-id', 'solution-root', 'allow-tools', 'deny-tools'],
+        boolean: ['disable-logging', 'no-logging'],
         alias: {
           'domain': 'teamwork-domain',
           'user': 'teamwork-username',
@@ -147,6 +149,13 @@ export const loadConfig = (args?: string[]) => {
     logger.info(`Using DENY_TOOLS from short form command line argument: ${argv['deny']}`);
   }
 
+  // Set logging disable option
+  if (argv['disable-logging'] || argv['no-logging']) {
+    process.env.DISABLE_LOGGING = 'true';
+    // Note: We can't use logger here since it might not be initialized yet
+    // The logger itself will check for this environment variable
+  }
+
   // Validate required configuration
   const isConfigValid = validateConfig();
 
@@ -161,6 +170,7 @@ export const loadConfig = (args?: string[]) => {
     solutionRootPath: process.env.SOLUTION_ROOT_PATH,
     allowTools: process.env.ALLOW_TOOLS,
     denyTools: process.env.DENY_TOOLS,
+    loggingDisabled: process.env.DISABLE_LOGGING === 'true',
     apiUrl,
     isValid: isConfigValid
   };

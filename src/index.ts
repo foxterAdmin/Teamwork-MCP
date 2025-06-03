@@ -20,7 +20,7 @@ import {
 const server = new Server(
   {
     name: 'teamwork-mcp',
-    version: '0.1.14-alpha'
+    version: '0.1.15-alpha'
   },
   {
     capabilities: {
@@ -193,7 +193,7 @@ async function main() {
         // Log startup information to file only
         logger.info('=== Teamwork MCP Server Starting ===');
         logger.info(`Server name: teamwork-mcp`);
-        logger.info(`Server version: 0.1.14-alpha`);
+        logger.info(`Server version: 0.1.15-alpha`);
         logger.info(`Node.js version: ${process.version}`);
         logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
         
@@ -206,6 +206,7 @@ async function main() {
         logger.info(`- Project ID: ${config.projectId || 'Not set'}`);
         logger.info(`- Allow tools: ${config.allowTools || 'All tools allowed'}`);
         logger.info(`- Deny tools: ${config.denyTools || 'No tools denied'}`);
+        logger.info(`- Logging: ${config.loggingDisabled ? 'Disabled' : 'Enabled'}`);
         
         // Validate configuration
         if (!config.isValid) {
