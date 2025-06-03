@@ -82,37 +82,21 @@ The following tools are available through the MCP server:
 
 ## Installation
 
-1. Clone the repository:
+### Using NPX (Recommended)
 
-   ``` batch
-   git clone https://github.com/readingdancer/teamwork-mcp.git
-   cd teamwork-mcp
-   ```
+The easiest way to use Teamwork MCP is with npx. This method doesn't require cloning the repository or building the code locally:
 
-2. dependencies:
+```bash
+npx @vizioz/teamwork-mcp
+```
 
-   ``` batch
-   npm install
-   ```
+You can also pass configuration options directly:
 
-3. Create a `.env` file based on the `.env.example` file:
-
-   ``` batch
-   cp .env.example .env
-   ```
-
-4. Update the `.env` file with your Teamwork credentials.
+```bash
+npx @vizioz/teamwork-mcp --domain=your-company --user=your-email@example.com --pass=your-password
+```
 
 ## Configuration
-
-Edit the `.env` file to configure the application:
-
-- `PORT`: The port on which the server will run (default: 3000)
-- `NODE_ENV`: The environment (development, production, test)
-- `LOG_LEVEL`: Logging level (info, error, debug)
-- `TEAMWORK_DOMAIN`: Your Teamwork domain name (e.g., "your-company" for https://your-company.teamwork.com)
-- `TEAMWORK_USERNAME`: Your Teamwork username (email)
-- `TEAMWORK_PASSWORD`: Your Teamwork password
 
 ### Setting Credentials
 
@@ -120,19 +104,54 @@ You can provide your Teamwork credentials in three ways:
 
 1. **Environment Variables**: Set `TEAMWORK_DOMAIN`, `TEAMWORK_USERNAME`, and `TEAMWORK_PASSWORD` in your environment.
 
-2. **.env File**: Create a `.env` file with the required variables as shown above.
+2. **.env File**: Create a `.env` file with the required variables:
+
+   ```
+   TEAMWORK_DOMAIN=your-company
+   TEAMWORK_USERNAME=your-email@example.com
+   TEAMWORK_PASSWORD=your-password
+   ```
 
 3. **Command Line Arguments**: Pass credentials when running the application:
 
-``` batch
-   node build/index.js --teamwork-domain=your-company --teamwork-username=your-email@example.com --teamwork-password=your-password
-```
+   ```bash
+   npx @vizioz/teamwork-mcp --teamwork-domain=your-company --teamwork-username=your-email@example.com --teamwork-password=your-password
+   ```
 
-Or using short form:
+   Or using short form:
 
-``` batch
-   node build/index.js --domain=your-company --user=your-email@example.com --pass=your-password
-```
+   ```bash
+   npx @vizioz/teamwork-mcp --domain=your-company --user=your-email@example.com --pass=your-password
+   ```
+
+### Logging Configuration
+
+By default, the Teamwork MCP server creates log files in a `logs` directory to help with debugging and monitoring. You can disable logging completely using the following methods:
+
+1. **Command Line Arguments**:
+
+   ```bash
+   npx @vizioz/teamwork-mcp --disable-logging
+   ```
+
+   Or using the alternative form:
+
+   ```bash
+   npx @vizioz/teamwork-mcp --no-logging
+   ```
+
+2. **Environment Variable**:
+
+   ```bash
+   DISABLE_LOGGING=true npx @vizioz/teamwork-mcp
+   ```
+
+When logging is enabled, the server creates two log files in the `logs` directory:
+
+- `error.log` - Contains only error-level messages
+- `combined.log` - Contains all log messages (info, warnings, errors)
+
+Each log file includes a header with instructions on how to disable logging if needed.
 
 ### Tool Filtering
 
@@ -140,26 +159,26 @@ You can control which tools are available to the MCP server using the following 
 
 1. **Allow List**: Only expose specific tools:
 
-   ``` batch
-      node build/index.js --allow-tools=getProjects,getTasks,getTaskById
+   ```bash
+   npx @vizioz/teamwork-mcp --allow-tools=getProjects,getTasks,getTaskById
    ```
 
    Or using short form:
 
-   ``` batch
-      node build/index.js --allow=getProjects,getTasks,getTaskById
+   ```bash
+   npx @vizioz/teamwork-mcp --allow=getProjects,getTasks,getTaskById
    ```
 
 2. **Deny List**: Expose all tools except those specified:
 
-   ``` batch
-      node build/index.js --deny-tools=deleteTask,updateTask
+   ```bash
+   npx @vizioz/teamwork-mcp --deny-tools=deleteTask,updateTask
    ```
 
    Or using short form:
 
-   ``` batch
-      node build/index.js --deny=deleteTask,updateTask
+   ```bash
+   npx @vizioz/teamwork-mcp --deny=deleteTask,updateTask
    ```
 
 ### Tool Filtering with Groups
@@ -179,26 +198,26 @@ You can specify these groups in the allow or deny lists to include or exclude al
 
 1. **Allow List with Groups**: Only expose specific groups of tools:
 
-   ```batch
-   node build/index.js --allow-tools=Tasks,People
+   ```bash
+   npx @vizioz/teamwork-mcp --allow-tools=Tasks,People
    ```
 
    Or using short form:
 
-   ```batch
-   node build/index.js --allow=Tasks,People
+   ```bash
+   npx @vizioz/teamwork-mcp --allow=Tasks,People
    ```
 
 2. **Deny List with Groups**: Expose all tools except those in specified groups:
 
-   ```batch
-   node build/index.js --deny-tools=Reporting,Time
+   ```bash
+   npx @vizioz/teamwork-mcp --deny-tools=Reporting,Time
    ```
 
    Or using short form:
 
-   ```batch
-   node build/index.js --deny=Reporting,Time
+   ```bash
+   npx @vizioz/teamwork-mcp --deny=Reporting,Time
    ```
 
 By default, all tools are exposed if neither allow nor deny list is provided. If both are provided, the allow list takes precedence.
@@ -216,7 +235,7 @@ To associate your current solution with a Teamwork project, you can use the foll
 
 You can create a `.teamwork` file in the root of your project with the following structure:
 
-``` batch
+```
 PROJECT_ID = YourTeamworkProjectID
 ```
 
@@ -224,69 +243,13 @@ This simple configuration file associates your solution with a specific Teamwork
 
 Once configured, the MCP will be able to find your Teamwork project and associate it with your current solution, reducing the number of API calls needed to get the project and tasks related to the solution you are working on.
 
-## Usage
+## Adding to MCP Clients
 
-### Using NPX (Recommended)
-
-The easiest way to use Teamwork MCP is with npx:
-
-```bash
-npx teamwork-mcp
-```
-
-You can also pass configuration options:
-
-```bash
-npx teamwork-mcp --domain=your-company --user=your-email@example.com --pass=your-password
-```
-
-### Building the application
-
-*Note: This is not needed if you just want to use the MCP, use the NPX instructions above.*
-
-Build the application:
-
-``` batch
-npm run build
-```
-
-This will compile the TypeScript code ready to be used as an MCP Server
-
-### Running as an MCP Server
-
-To run as an MCP server for integration with Cursor and other applications, if you are using the .env file for your username, password & url, or if you have saved them in environment variables:
-
-*NOTE: Don't forget to change the drive and path details based on where you have saved the repository.*
-
-``` batch
-node C:/your-full-path/build/index.js
-```
-
-Or you can pass them using line arguments:
-
-``` batch
-node C:/your-full-path/build/index.js --teamwork-domain=your-company --teamwork-username=your-email@example.com --teamwork-password=your-password
-```
-
-You can also use the short form:
-
-``` batch
-node C:/your-full-path/build/index.js --domain=your-company --user=your-email@example.com --pass=your-password
-```
-
-### Using the MCP Inspector
-
-To run the MCP inspector for debugging:
-
-``` batch
-npm run inspector
-```
-
-## Adding to Cursor (and other MCP Clients)
+### Cursor
 
 To add this MCP server to Cursor:
 
-### Versions before 0.47
+#### Versions before 0.47
 
 1. Open Cursor Settings > Features > MCP
 2. Click "+ Add New MCP Server"
@@ -296,10 +259,80 @@ To add this MCP server to Cursor:
    - You can include tool filtering options: `--allow=getProjects,getTasks` or `--deny=deleteTask`
 6. Click "Add"
 
-### Versions after 0.47 ( editing the config manually )
+#### Versions after 0.47 (editing the config manually)
 
-``` json
-    "Teamwork": {
+```json
+"Teamwork": {
+  "command": "npx",
+  "args": [
+    "-y",
+    "@vizioz/teamwork-mcp",
+    "--domain",
+    "yourdomain",
+    "--user",
+    "youruser@yourdomain.com",
+    "--pass",
+    "yourPassword"
+  ]
+}
+```
+
+To disable logging in Cursor, add the `--disable-logging` argument:
+
+```json
+"Teamwork": {
+  "command": "npx",
+  "args": [
+    "-y",
+    "@vizioz/teamwork-mcp",
+    "--domain",
+    "yourdomain",
+    "--user",
+    "youruser@yourdomain.com",
+    "--pass",
+    "yourPassword",
+    "--disable-logging"
+  ]
+}
+```
+
+If you want to add the allow or deny arguments mentioned above you just add them like this, you can add any of the examples given above, you can also add both groups and individual tools as shown below:
+
+```json
+"Teamwork": {
+  "command": "npx",
+  "args": [
+    "-y",
+    "@vizioz/teamwork-mcp",
+    "--domain",
+    "yourdomain",
+    "--user",
+    "youruser@yourdomain.com",
+    "--pass",
+    "yourPassword",
+    "--allow",
+    "Tasks,Projects",
+    "--deny",
+    "getProjectsPeopleMetricsPerformance,getProjectsPeopleUtilization"
+  ]
+}
+```
+
+The Teamwork MCP tools will now be available to the Cursor Agent in Composer.
+
+### Claude Desktop
+
+To add this MCP server to Claude Desktop, edit your Claude Desktop configuration file:
+
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+
+Add the following configuration:
+
+```json
+{
+  "mcpServers": {
+    "teamwork": {
       "command": "npx",
       "args": [
         "-y",
@@ -312,30 +345,89 @@ To add this MCP server to Cursor:
         "yourPassword"
       ]
     }
+  }
+}
 ```
 
-If you want to add the allow or deny arguments mentioned above you just add them like this, you can add any of the examples given above, you can also add both groups and individual tools as shown below:
+### Windsurf
 
-``` json
-    "Teamwork": {
-      "command": "npx",
-      "args": [
-        "-y",
-        "@vizioz/teamwork-mcp",
-        "--domain",
-        "yourdomain",
-        "--user",
-        "youruser@yourdomain.com",
-        "--pass",
-        "yourPassword",
-        "--allow",
-        "Tasks,Projects",
-        "--deny",
-        "getProjectsPeopleMetricsPerformance,getProjectsPeopleUtilization"
-      ]
+To add this MCP server to Windsurf, follow similar steps to Cursor by adding the MCP server configuration with the npx command and your credentials.
+
+## Building from Source
+
+*Note: You only need to follow these instructions if you plan to contribute to the project or submit a pull request. For regular usage, use the NPX installation method above.*
+
+### Local Development Setup
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/readingdancer/teamwork-mcp.git
+   cd teamwork-mcp
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+3. Create a `.env` file based on the `.env.example` file:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Update the `.env` file with your Teamwork credentials:
+
+   ```
+   PORT=3000
+   NODE_ENV=development
+   LOG_LEVEL=info
+   TEAMWORK_DOMAIN=your-company
+   TEAMWORK_USERNAME=your-email@example.com
+   TEAMWORK_PASSWORD=your-password
+   ```
+
+### Building the Application
+
+Build the application:
+
+```bash
+npm run build
 ```
 
-The Teamwork MCP tools will now be available to the Cursor Agent in Composer.
+This will compile the TypeScript code ready to be used as an MCP Server.
+
+### Running as an MCP Server (Local Build)
+
+To run as an MCP server for integration with Cursor and other applications, if you are using the .env file for your username, password & url, or if you have saved them in environment variables:
+
+*NOTE: Don't forget to change the drive and path details based on where you have saved the repository.*
+
+```bash
+node C:/your-full-path/build/index.js
+```
+
+Or you can pass them using line arguments:
+
+```bash
+node C:/your-full-path/build/index.js --teamwork-domain=your-company --teamwork-username=your-email@example.com --teamwork-password=your-password
+```
+
+You can also use the short form:
+
+```bash
+node C:/your-full-path/build/index.js --domain=your-company --user=your-email@example.com --pass=your-password
+```
+
+### Using the MCP Inspector
+
+To run the MCP inspector for debugging:
+
+```bash
+npm run inspector
+```
 
 ## License
 
