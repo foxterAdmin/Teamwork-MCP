@@ -1,6 +1,6 @@
 # Teamwork MCP
 
-[![npm version](https://img.shields.io/npm/v/@vizioz/teamwork-mcp.svg)](https://www.npmjs.com/package/@vizioz/teamwork-mcp)
+[![npm version](https://img.shields.io/npm/v/@vizioz/teamwork-mcp.svg)](https://www.npmjs.com/package/@vizioz/teamwork-mcp) [![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/d18e81f9-f526-4751-841e-b57a0d70b5c0)
 
 An MCP server that connects to the Teamwork API, providing a simplified interface for interacting with Teamwork projects and tasks.
 
