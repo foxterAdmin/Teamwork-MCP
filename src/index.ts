@@ -1,5 +1,6 @@
 import { Server } from "@modelcontextprotocol/sdk/server/index.js";
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
+import express from 'express';
+import { SSEServerTransport } from '@modelcontextprotocol/sdk/server/sse.js';
 import {
   CallToolRequestSchema,
   ListToolsRequestSchema,
@@ -222,10 +223,33 @@ async function main() {
         }
         
         // Connect using stdio transport - no console output
-        logger.info('Connecting to stdio transport...');
-        const transport = new StdioServerTransport();
-        await server.connect(transport);
-        logger.info('Server connected to stdio transport successfully');
+225   // --- Switching from stdio to HTTP/SSE transport ---
+226   const express = await import('express');
+227   const { SSEServerTransport } = await import('@modelcontextprotocol/sdk/server/sse.js');
+228
+229   const app = express.default();
+230   app.use(express.default.json());
+231
+232   const transports: Record<string, SSEServerTransport> = {};
+233
+234   app.get('/sse', async (_req, res) => {
+235     const transport = new SSEServerTransport('/messages', res);
+236     transports[transport.sessionId] = transport;
+237     res.on('close', () => delete transports[transport.sessionId]);
+238     await server.connect(transport);
+239   });
+240
+241   app.post('/messages', async (req, res) => {
+242     const sessionId = req.query.sessionId as string;
+243     const transport = transports[sessionId];
+244     if (!transport) return res.status(400).send('No transport for sessionId');
+245     await transport.handlePostMessage(req, res);
+246   });
+247
+248   const port = parseInt(process.env.PORT || '3000', 10);
+249   app.listen(port, () =>
+250     logger.info(`HTTP/SSE MCP Server listening on port ${port}`)
+251   );
         logger.info('=== Teamwork MCP Server Ready ===');
     } catch (error: any) {
         logger.error(`Server startup error: ${error.message}`);
